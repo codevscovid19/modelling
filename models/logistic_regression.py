@@ -150,20 +150,20 @@ class LogisticRegression:
 
 if __name__=='main': 
     
-    filepath = 'file\path\goes\here'
+    filepath = 'file\path\goes\here\uk_harmonized.csv'
     filename = 'uk_harmonized.csv'
     data = pd.read_csv(filepath)
     model = LogisticRegression()
     prediction_span = 10       # number of days to look into the future
 
-    for name_region, data_region in data.groupby('region_name'): 
-    
-        if name_region in ['Scotland', 'England', 'Wales', 'Northerm Ireland']: 
-            
-            predictor_region = Predictor(data_region, model)
-            predictor_region.fit_data(value_type = 'positive_total')
-            data_region_extrap = predictor_region.extrapolate(prediction_span)
-            data = pd.concat([data, data_region_extrap])
+    for region in ['Scotland', 'England', 'Wales', 'Northerm Ireland']:
+        # only select region & empty area (exclude individual area data)
+        df_region = df2.loc[(df2['region_name'] == region) & (df2['area_name'].isnull())]
+                    
+        predictor_region = Predictor(df_region, model)
+        predictor_region.fit_data(value_type = 'positive_total')
+        data_region_extrap = predictor_region.extrapolate(prediction_span)
+        data = pd.concat([data, data_region_extrap])
     
     data.to_csv(os.path.join(filepath,str(prediction_span)+ 'day_extra'+ filename))
 
